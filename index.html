@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>megane-photo</title>
+<!--
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+-->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+<h1>megane-photo</h1>
+
+<div class="container">
+  <canvas id=canvas></canvas><br>
+</div>
+
+<hr>
+<footer>
+lib: <a href="https://chuoling.github.io/mediapipe/solutions/face_mesh.html">Face Mesh - mediapipe</a><br>
+src: <a href="https://github.com/code4fukui/megane-photo/">src on GitHub</a><br>
+</footer>
+
+<script type="module">
+import { waitImageLoad } from "https://js.sabae.cc/waitImageLoad.js";
+import { waitClick } from "https://js.sabae.cc/waitClick.js";
+import { setDropImageFileListener } from "https://js.sabae.cc/setDropImageFileListener.js";
+import { drawConnectorsPolygon } from "https://code4fukui.github.io/mediapipe-test/drawConnectorsPolygon.js";
+import { getFaceMeshPointEyeRight, getFaceMeshPointEyeLeft } from "https://code4fukui.github.io/mediapipe-test/FACEMESH_POLYGON.js";
+
+const faceMesh = new FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}` });
+
+const MAX_FACES = 10;
+
+faceMesh.setOptions({
+  //running_mode: VIDEO,
+  maxNumFaces: MAX_FACES,
+  refineLandmarks: true,
+  minDetectionConfidence: 0.5,
+  minTrackingConfidence: 0.5,
+});
+const faceMeshSendAsync = async (image) => {
+  return new Promise(resolve => {
+    faceMesh.onResults(resolve);
+    faceMesh.send({ image });
+  });
+};
+
+const imgmegane = new Image();
+imgmegane.src = "./visionpro.png";
+
+const setImage = async (img) => {
+  const w = canvas.width = img.width;
+  const h = canvas.height = img.height;
+  canvas.style.aspectRatio = img.width / img.height;
+  const g = canvas.getContext("2d");
+  g.drawImage(img, 0, 0, canvas.width, canvas.height);
+  const res = await faceMeshSendAsync(img);
+  if (res.multiFaceLandmarks) {
+    for (const landmarks of res.multiFaceLandmarks) {
+      const p1 = getFaceMeshPointEyeRight(landmarks);
+      const p2 = getFaceMeshPointEyeLeft(landmarks);
+      p1.x *= w;
+      p2.x *= w;
+      p1.y *= h;
+      p2.y *= h;
+
+      const dx = p1.x - p2.x;
+      const dy = p1.y - p2.y;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      
+      const cx = (p1.x + p2.x) / 2;
+      const cy = (p1.y + p2.y) / 2;
+
+      const th = Math.atan2(dy, dx);
+
+      g.save();
+      g.translate(cx, cy);
+      g.rotate(th + Math.PI);
+      const iw = len * 2.5;
+      const ih = iw / imgmegane.width * imgmegane.height;
+      g.drawImage(imgmegane, 0, 0, imgmegane.width, imgmegane.height, -iw / 2, -ih / 2, iw, ih);
+      g.restore();
+    }
+  }
+  g.restore();
+};
+
+setDropImageFileListener(document.body, async (img) => {
+  await setImage(img);
+});
+
+canvas.width = 1600;
+canvas.height = 900;
+const g = canvas.getContext("2d");
+g.font = "bold 48px serif";
+g.fillText("drop image file here", 50, 100);
+
+// test image
+const img = new Image();
+img.src = "./test.jpg";
+await waitImageLoad(img);
+await setImage(img);
+
+</script>
+
+<style>
+body {
+  margin: 0;
+  text-align: center;
+  font-family: sans-serif;
+}
+canvas {
+  max-width: 100%;
+}
+</style>
+
+</body>
+</html>
