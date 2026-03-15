@@ -15,5 +15,8 @@ https://code4fukui.github.io/megane-photo/
 1. 画像ファイルをWebブラウザにドラッグ&ドロップしてください。
 2. 顔の位置に合わせて眼鏡の画像が自動的に表示されます。
 
+## データ・API
+アプリケーションでは[MediaPipe Face Mesh](https://chuoling.github.io/mediapipe/solutions/face_mesh.html)ライブラリを使用して顔の特徴点を検出し、眼鏡の位置を決めています。
+
 ## ライセンス
-MIT License
+このプロジェクトはMITライセンスの下で提供されています。

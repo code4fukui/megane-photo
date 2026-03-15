@@ -1,5 +1,7 @@
 # megane-photo
 
+> 日本語のREADMEはこちらです: [README.ja.md](README.ja.md)
+
 A web application that overlays glasses on a face detected in an image.
 
 ## Demo
