@@ -24,4 +24,4 @@ Try the demo at [https://code4fukui.github.io/megane-photo/](https://code4fukui.
 The application uses the [MediaPipe Face Mesh](https://chuoling.github.io/mediapipe/solutions/face_mesh.html) library to detect facial landmarks and position the glasses.
 
 ## License
-This project is licensed under the MIT License.
+MIT License — see [LICENSE](LICENSE).
